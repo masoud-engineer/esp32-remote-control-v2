@@ -56,7 +56,7 @@
             <div id="commandMsg" class="notice">Device feedback will appear here. Controls activate when device state is available.</div>
           </section>
           <section class="card">
-            <div class="cardhead"><h2>Device telemetry</h2><span class="tiny" id="refreshLabel">Auto refresh · 5 seconds</span></div>
+            <div class="cardhead"><h2>Device telemetry</h2><span class="tiny" id="refreshLabel">Auto refresh · 2 seconds</span></div>
             <div class="statgrid">
               <div class="stat"><label>Connection</label><strong id="statConnection">Unknown</strong></div>
               <div class="stat"><label>Last heartbeat</label><strong id="statHeartbeat" class="smallval">Not received</strong></div>
@@ -147,7 +147,7 @@
       pollHandle = setInterval(() => {
         if (Date.now() >= sessionEndsAt) { logout("Your 8-hour session expired. Please sign in again."); return; }
         refreshStatus();
-      }, 5000);
+      }, 2000);
     }
 
     async function refreshStatus() {
