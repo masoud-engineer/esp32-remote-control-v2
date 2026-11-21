@@ -3,91 +3,227 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07111f">
-  <title>ESP32 V2 | Secure Access</title>
+  <meta name="theme-color" content="#08111e">
+  <meta name="description" content="Secure ESP32 Remote Control V2 device dashboard">
+  <title>ESP32 Remote Control V2</title>
   <style>
-    :root{color-scheme:dark;--bg:#07111f;--panel:#101e30;--line:#20344d;--muted:#8fa4bd;--text:#edf5ff;--accent:#42d6a4;--blue:#69a9ff}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 15% 10%,#17334b 0,transparent 42%),radial-gradient(ellipse at 90% 90%,#123b3b 0,transparent 35%),var(--bg);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text)}
-    .shell{width:min(100%,440px)}
-    .brand{display:flex;align-items:center;gap:12px;margin:0 0 26px}
-    .mark{width:44px;height:44px;border:1px solid #31506d;border-radius:13px;display:grid;place-items:center;background:#12263a;color:var(--accent);font-size:22px}
-    .brand strong{display:block;font-size:16px;letter-spacing:.04em}.brand span{color:var(--muted);font-size:12px}
-    .card{padding:30px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,rgba(20,38,59,.97),rgba(12,25,41,.97));box-shadow:0 24px 80px #0007}
-    .eyebrow{color:var(--accent);font-size:11px;font-weight:750;letter-spacing:.16em;text-transform:uppercase}
-    h1{font-size:28px;line-height:1.2;margin:10px 0}
-    .intro{margin:0 0 26px;color:var(--muted)}
-    label{display:block;margin:0 0 8px;font-size:13px;font-weight:650}
-    input{width:100%;height:52px;padding:0 15px;border:1px solid #2b4561;border-radius:12px;background:#091625;color:var(--text);font:inherit;outline:none}
-    input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #69a9ff22}
-    button{width:100%;height:52px;margin-top:14px;border:0;border-radius:12px;background:var(--accent);color:#05251c;font:700 15px system-ui;cursor:pointer}
-    button:disabled{opacity:.6;cursor:wait}
-    .result{display:none;margin-top:18px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;font-size:13px;overflow-wrap:anywhere}
-    .result.show{display:block}.result.ok{border-color:#26775e;background:#0b2c27;color:#aaf4d8}.result.bad{border-color:#82434b;background:#321a22;color:#ffc0c5}
-    .meta{display:flex;justify-content:space-between;gap:12px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
-    .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--accent);margin-right:7px}
-    .foot{text-align:center;margin:18px 0 0;color:#71869e;font-size:11px}
-    @media(max-width:480px){.card{padding:24px}.brand{margin-bottom:20px}h1{font-size:25px}}
+    :root{color-scheme:dark;--bg:#08111e;--panel:#101d2d;--panel2:#142438;--line:#26394f;--text:#edf4fc;--muted:#91a4ba;--green:#48d6a0;--blue:#70adff;--red:#ff707b;--amber:#f3c66d}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#17334a 0,transparent 34%),radial-gradient(ellipse at 100% 100%,#10362f 0,transparent 28%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+    button,input{font:inherit}button{cursor:pointer}.hidden{display:none!important}.wrap{width:min(1160px,calc(100% - 32px));margin:auto}
+    header{height:76px;border-bottom:1px solid #ffffff12;background:#08111ecc;backdrop-filter:blur(14px);display:flex;align-items:center;position:sticky;top:0;z-index:5}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:12px}.mark{width:42px;height:42px;border-radius:13px;border:1px solid #31506d;background:#12263a;display:grid;place-items:center;color:var(--green);font-size:23px}.brand b{display:block;letter-spacing:.04em;font-size:14px}.brand small{color:var(--muted);font-size:10px;letter-spacing:.12em}
+    .topright{display:flex;align-items:center;gap:12px}.pill{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}.lamp{width:7px;height:7px;border-radius:50%;background:#8292a5}.lamp.online{background:var(--green);box-shadow:0 0 12px #48d6a077}.lamp.offline{background:var(--red)}
+    .btn{border:1px solid var(--line);border-radius:10px;background:#17283c;color:var(--text);padding:9px 13px;font-weight:650}.btn:hover{border-color:#55718f}.btn.primary{background:var(--green);color:#06251c;border:0}.btn:disabled{opacity:.45;cursor:not-allowed}
+    main{padding:30px 0 50px}.heading{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:22px}.eyebrow{color:var(--green);font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}h1{font-size:clamp(25px,4vw,34px);margin:5px 0 3px;line-height:1.2}.sub{color:var(--muted);margin:0}.grid{display:grid;grid-template-columns:1.35fr .85fr;gap:16px}.stack{display:grid;gap:16px}.card{background:linear-gradient(145deg,#142438f5,#0e1b2bf5);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 14px 44px #0002}.cardhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.card h2{font-size:15px;margin:0}.muted{color:var(--muted)}.tiny{font-size:11px;color:var(--muted)}
+    .leds{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.led{border:1px solid var(--line);border-radius:15px;padding:16px;background:#0b1726;min-width:0}.ledtop{display:flex;align-items:center;gap:9px;font-weight:750}.ledbulb{width:13px;height:13px;border-radius:50%;background:#4b5868;box-shadow:inset 0 0 0 2px #ffffff12}.ledbulb.red.on{background:#ff5967;box-shadow:0 0 16px #ff596788}.ledbulb.green.on{background:#48d6a0;box-shadow:0 0 16px #48d6a088}.ledbulb.blue.on{background:#70adff;box-shadow:0 0 16px #70adff88}.ledstate{font-size:12px;color:var(--muted);margin:12px 0}.toggle{width:100%;border:1px solid var(--line);border-radius:9px;background:#17283c;color:var(--text);padding:9px;font-weight:700}.toggle.on{border-color:#34775f;background:#103328;color:#aaf2d5}
+    .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:#0b1726;border:1px solid #20334a;border-radius:12px;padding:13px}.stat label{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:18px;margin-top:4px;overflow-wrap:anywhere}.stat strong.smallval{font-size:13px}
+    .weather{display:flex;align-items:center;justify-content:space-between;gap:14px}.temp{font-size:38px;font-weight:750;letter-spacing:-.05em}.weathericon{font-size:34px}.weatherdesc{color:var(--muted);font-size:12px}.weathergrid{display:flex;gap:18px;margin-top:14px;color:var(--muted);font-size:12px;flex-wrap:wrap}
+    .mapbox{height:170px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#10283a;position:relative}.mapbox iframe{width:100%;height:100%;border:0;filter:saturate(.8)}.maplink{display:inline-block;margin-top:10px;color:#91c2ff;text-decoration:none;font-size:12px}
+    .activity{display:grid;gap:9px}.activityrow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #ffffff0d;font-size:12px}.activityrow:last-child{border:0}.activityrow span:first-child{color:var(--muted)}
+    .notice{padding:11px 13px;border:1px solid var(--line);border-radius:11px;color:var(--muted);font-size:12px;margin-top:14px}.notice.good{border-color:#28664f;color:#a9e9d0;background:#0b2923}.notice.bad{border-color:#77404a;color:#ffc0c5;background:#2c1820}
+    .login{width:min(440px,calc(100% - 32px));margin:9vh auto}.login .card{padding:28px}.login h1{font-size:28px;margin:10px 0}.login p{color:var(--muted)}label.field{display:block;font-size:12px;font-weight:700;margin:18px 0 7px}input{width:100%;height:48px;padding:0 13px;border:1px solid #2b4561;border-radius:10px;background:#091625;color:var(--text);outline:none}input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #70adff22}.login .btn{width:100%;margin-top:12px;height:48px}.loginmsg{font-size:12px;margin-top:14px;overflow-wrap:anywhere}.foot{text-align:center;color:#70849a;font-size:11px;margin:18px 0}
+    @media(max-width:800px){.grid{grid-template-columns:1fr}.heading{align-items:flex-start;flex-direction:column}.mapbox{height:190px}}
+    @media(max-width:520px){.wrap{width:min(100% - 22px,1160px)}header{height:68px}.brand small{font-size:9px}.pill{font-size:10px;padding:6px 8px}.topright{gap:7px}.leds{gap:8px}.led{padding:11px}.ledtop{font-size:12px}.toggle{font-size:11px;padding:8px 4px}.card{padding:15px}.statgrid{gap:8px}.stat{padding:10px}.stat strong{font-size:16px}}
   </style>
 </head>
 <body>
-  <main class="shell">
-    <div class="brand">
-      <div class="mark" aria-hidden="true">⌁</div>
-      <div><strong>ESP32 REMOTE CONTROL</strong><span>VERSION 2 · DEVICE MANAGEMENT</span></div>
-    </div>
-    <section class="card">
-      <div class="eyebrow">Private dashboard</div>
-      <h1>Secure access</h1>
-      <p class="intro">Sign in with your private access code to verify the V2 authentication service.</p>
-      <form id="loginForm">
-        <label for="accessCode">Dashboard access code</label>
-        <input id="accessCode" type="password" autocomplete="current-password" placeholder="Enter your access code" required minlength="12">
-        <button id="submitBtn" type="submit">Verify and sign in</button>
-      </form>
-      <div id="result" class="result" role="status" aria-live="polite"></div>
-      <div class="meta"><span><i class="dot"></i>Secure connection</span><span>Cloud API · V2</span></div>
-    </section>
-    <p class="foot">Your access code is sent securely to the V2 API and is not saved by this page.</p>
-  </main>
+  <section id="loginView" class="login">
+    <div class="brand"><div class="mark">⌁</div><div><b>ESP32 REMOTE CONTROL</b><small>VERSION 2 · DEVICE MANAGEMENT</small></div></div>
+    <div class="card">
+      <div class="eyebrow">Private dashboard</div><h1>Welcome back</h1>
+      <p>Sign in to securely access your ESP32 device dashboard.</p>
+      <form id="loginForm"><label class="field" for="accessCode">Dashboard access code</label><input id="accessCode" type="password" minlength="12" autocomplete="current-password" placeholder="Enter your access code" required><button class="btn primary" id="loginBtn" type="submit">Sign in securely</button></form>
+      <div id="loginMsg" class="loginmsg" role="status" aria-live="polite"></div>
+    </div><div class="foot">V2 secure session · Your access code is never stored.</div>
+  </section>
+
+  <div id="dashboardView" class="hidden">
+    <header><div class="wrap top">
+      <div class="brand"><div class="mark">⌁</div><div><b>ESP32 REMOTE CONTROL</b><small>VERSION 2 · DEVICE MANAGEMENT</small></div></div>
+      <div class="topright"><span class="pill"><i id="statusLamp" class="lamp"></i><span id="connectionText">Checking device</span></span><button class="btn" id="logoutBtn">Log out</button></div>
+    </div></header>
+    <main class="wrap">
+      <div class="heading"><div><div class="eyebrow">Control center</div><h1>Device dashboard</h1><p class="sub">Monitor and control your ESP32 remotely.</p></div><span class="pill">Device ID · <b id="deviceId">esp32-v2</b></span></div>
+      <div class="grid">
+        <div class="stack">
+          <section class="card">
+            <div class="cardhead"><h2>LED controls</h2><span class="tiny">Commands sent securely via cloud</span></div>
+            <div class="leds">
+              <div class="led"><div class="ledtop"><i class="ledbulb red" id="bulb-red"></i>Red</div><div class="ledstate" id="state-red">Waiting for device</div><button class="toggle" data-led="red" disabled>Turn on</button></div>
+              <div class="led"><div class="ledtop"><i class="ledbulb green" id="bulb-green"></i>Green</div><div class="ledstate" id="state-green">Waiting for device</div><button class="toggle" data-led="green" disabled>Turn on</button></div>
+              <div class="led"><div class="ledtop"><i class="ledbulb blue" id="bulb-blue"></i>Blue</div><div class="ledstate" id="state-blue">Waiting for device</div><button class="toggle" data-led="blue" disabled>Turn on</button></div>
+            </div>
+            <div id="commandMsg" class="notice">Device feedback will appear here. Controls activate when device state is available.</div>
+          </section>
+          <section class="card">
+            <div class="cardhead"><h2>Device telemetry</h2><span class="tiny" id="refreshLabel">Auto refresh · 5 seconds</span></div>
+            <div class="statgrid">
+              <div class="stat"><label>Connection</label><strong id="statConnection">Unknown</strong></div>
+              <div class="stat"><label>Last heartbeat</label><strong id="statHeartbeat" class="smallval">Not received</strong></div>
+              <div class="stat"><label>Last state update</label><strong id="statState" class="smallval">Not received</strong></div>
+              <div class="stat"><label>Heartbeat age</label><strong id="statAge">—</strong></div>
+            </div>
+          </section>
+          <section class="card">
+            <div class="cardhead"><h2>Recent activity</h2><span class="tiny">Latest command & acknowledgement</span></div>
+            <div class="activity">
+              <div class="activityrow"><span>Last command</span><b id="lastCommand">No commands yet</b></div>
+              <div class="activityrow"><span>Command status</span><b id="commandStatus">—</b></div>
+              <div class="activityrow"><span>Last acknowledgement</span><b id="lastAck">Not received</b></div>
+              <div class="activityrow"><span>Last device contact</span><b id="lastSeen">Not received</b></div>
+            </div>
+          </section>
+        </div>
+        <aside class="stack">
+          <section class="card">
+            <div class="cardhead"><h2>Dar es Salaam weather</h2><span class="tiny">Live conditions</span></div>
+            <div class="weather"><div><div class="temp" id="temperature">—°</div><div class="weatherdesc" id="weatherDesc">Loading weather…</div></div><div class="weathericon" id="weatherIcon">⛅</div></div>
+            <div class="weathergrid"><span id="humidity">Humidity —</span><span id="wind">Wind —</span></div>
+            <div class="tiny" style="margin-top:12px">Dar es Salaam, Tanzania · Open-Meteo</div>
+          </section>
+          <section class="card">
+            <div class="cardhead"><h2>Device location</h2><span class="tiny">Configured site</span></div>
+            <div class="mapbox"><iframe title="Dar es Salaam map" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=39.18%2C-6.82%2C39.24%2C-6.76&layer=mapnik&marker=-6.7924%2C39.2083"></iframe></div>
+            <a class="maplink" href="https://www.openstreetmap.org/?mlat=-6.7924&mlon=39.2083#map=14/-6.7924/39.2083" target="_blank" rel="noopener">Open larger map ↗</a>
+          </section>
+          <section class="card">
+            <div class="cardhead"><h2>System information</h2></div>
+            <div class="activity">
+              <div class="activityrow"><span>Platform</span><b>ESP32 · V2</b></div>
+              <div class="activityrow"><span>Cloud API</span><b>Connected</b></div>
+              <div class="activityrow"><span>Command transport</span><b>MQTT / EMQX</b></div>
+              <div class="activityrow"><span>Session</span><b id="sessionRemaining">Active</b></div>
+            </div>
+          </section>
+        </aside>
+      </div>
+      <div class="foot">ESP32 Remote Control V2 · Secure session · Device commands require firmware connectivity</div>
+    </main>
+  </div>
+
   <script>
-    const form = document.getElementById("loginForm");
-    const codeInput = document.getElementById("accessCode");
-    const button = document.getElementById("submitBtn");
-    const result = document.getElementById("result");
+    // Keep the bearer token in memory only: reloading the page requires signing in again.
+    const API = "https://esp32-remote-control-v2-api.masoudsubi.workers.dev";
+    let sessionToken = null;
+    let sessionEndsAt = 0;
+    let pollHandle = null;
+    let weatherLoaded = false;
+    const $ = (id) => document.getElementById(id);
+    const authHeaders = () => ({ "Authorization": "Bearer " + sessionToken, "Content-Type": "application/json" });
 
-    form.addEventListener("submit", async (event) => {
+    $("loginForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-      const accessCode = codeInput.value;
-      button.disabled = true;
-      button.textContent = "Verifying…";
-      result.className = "result show";
-      result.textContent = "Connecting securely to the V2 authentication service…";
-
+      const btn = $("loginBtn");
+      btn.disabled = true; btn.textContent = "Signing in…"; $("loginMsg").textContent = "Verifying access with the V2 API…";
       try {
-        const response = await fetch("https://esp32-remote-control-v2-api.masoudsubi.workers.dev/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ accessCode })
-        });
+        const response = await fetch(API + "/api/login", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({accessCode:$("accessCode").value}) });
         const data = await response.json();
-
-        if (response.ok && data.token) {
-          result.className = "result show ok";
-          result.textContent = "✓ Login successful. Your access code is accepted and the V2 session service is working. Session duration: " + data.expiresIn + " seconds. The session token was not saved or displayed.";
-        } else {
-          result.className = "result show bad";
-          result.textContent = "Login not accepted (" + response.status + "): " + (data.error || "Please check the access code and try again.");
-        }
-      } catch (error) {
-        result.className = "result show bad";
-        result.textContent = "Could not reach the API. Check your internet connection, GitHub Pages URL, and API CORS configuration.";
-      } finally {
-        codeInput.value = "";
-        button.disabled = false;
-        button.textContent = "Verify and sign in";
-      }
+        if (!response.ok || !data.token) throw new Error(data.error || "Login failed (" + response.status + ")");
+        sessionToken = data.token; sessionEndsAt = Date.now() + (data.expiresIn || 28800) * 1000;
+        $("accessCode").value = ""; $("loginView").classList.add("hidden"); $("dashboardView").classList.remove("hidden");
+        startDashboard();
+      } catch (error) { $("loginMsg").textContent = error.message || "Could not connect to the API."; }
+      finally { btn.disabled = false; btn.textContent = "Sign in securely"; }
     });
+
+    function logout(message) {
+      sessionToken = null; sessionEndsAt = 0;
+      if (pollHandle) clearInterval(pollHandle);
+      $("dashboardView").classList.add("hidden"); $("loginView").classList.remove("hidden");
+      $("loginMsg").textContent = message || "You have been signed out.";
+    }
+    $("logoutBtn").addEventListener("click", () => logout("You have been signed out."));
+
+    function startDashboard() {
+      refreshStatus(); loadWeather();
+      if (pollHandle) clearInterval(pollHandle);
+      pollHandle = setInterval(() => {
+        if (Date.now() >= sessionEndsAt) { logout("Your 8-hour session expired. Please sign in again."); return; }
+        refreshStatus();
+      }, 5000);
+    }
+
+    async function refreshStatus() {
+      try {
+        const response = await fetch(API + "/api/status", { headers:authHeaders(), cache:"no-store" });
+        if (response.status === 401) { logout("Your session is invalid or expired. Please sign in again."); return; }
+        if (!response.ok) throw new Error("Status request failed (" + response.status + ")");
+        const d = await response.json();
+        $("deviceId").textContent = d.deviceId || "esp32-v2";
+        const online = Boolean(d.online);
+        $("connectionText").textContent = online ? "Device online" : "Device offline";
+        $("statusLamp").className = "lamp " + (online ? "online" : "offline");
+        $("statConnection").textContent = online ? "Online" : "Offline";
+        $("statConnection").style.color = online ? "var(--green)" : "var(--red)";
+        $("statHeartbeat").textContent = formatTime(d.lastHeartbeatAt);
+        $("statState").textContent = formatTime(d.lastStateAt);
+        $("statAge").textContent = d.heartbeatAgeSeconds == null ? "—" : d.heartbeatAgeSeconds + " sec";
+        $("lastSeen").textContent = formatTime(d.lastSeenAt);
+        const state = d.leds || {};
+        ["red","green","blue"].forEach((led) => {
+          const known = typeof state[led] === "boolean", on = state[led] === true;
+          $("bulb-" + led).classList.toggle("on", on);
+          $("state-" + led).textContent = !known ? "State not reported" : on ? "Currently ON" : "Currently OFF";
+          const button = document.querySelector('[data-led="' + led + '"]');
+          button.disabled = !known;
+          button.textContent = on ? "Turn off" : "Turn on";
+          button.classList.toggle("on", on);
+        });
+        const cmd = d.lastCommand;
+        $("lastCommand").textContent = cmd ? cmd.led.toUpperCase() + " → " + (cmd.state ? "ON" : "OFF") : "No commands yet";
+        $("commandStatus").textContent = cmd ? (cmd.status || "Pending").replaceAll("_"," ") : "—";
+        $("lastAck").textContent = d.lastAck ? d.lastAck.led.toUpperCase() + " " + (d.lastAck.status || "") : "Not received";
+      } catch (error) {
+        $("connectionText").textContent = "API unavailable"; $("statusLamp").className = "lamp offline";
+        $("commandMsg").className = "notice bad"; $("commandMsg").textContent = error.message + ". Retrying automatically.";
+      }
+      $("sessionRemaining").textContent = Math.max(0, Math.ceil((sessionEndsAt-Date.now())/60000)) + " min";
+    }
+
+    document.querySelectorAll("[data-led]").forEach((button) => button.addEventListener("click", async () => {
+      const led = button.dataset.led;
+      const isOn = button.textContent.toLowerCase().includes("turn off");
+      button.disabled = true;
+      $("commandMsg").className = "notice"; $("commandMsg").textContent = "Sending " + led + " LED command…";
+      try {
+        const response = await fetch(API + "/api/command", { method:"POST", headers:authHeaders(), body:JSON.stringify({led, state:!isOn}) });
+        const data = await response.json();
+        if (response.status === 401) { logout("Session expired. Please sign in again."); return; }
+        if (!response.ok) throw new Error(data.error || "Command rejected (" + response.status + ")");
+        $("commandMsg").className = "notice good";
+        $("commandMsg").textContent = "Command accepted by the MQTT broker. Waiting for ESP32 acknowledgement and updated state. Command ID: " + data.commandId;
+        setTimeout(refreshStatus, 1200);
+      } catch (error) {
+        $("commandMsg").className = "notice bad"; $("commandMsg").textContent = error.message;
+      } finally { button.disabled = false; }
+    }));
+
+    function formatTime(value) {
+      if (!value) return "Not received";
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? "—" : date.toLocaleString([], {month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    }
+
+    async function loadWeather() {
+      try {
+        const url = "https://api.open-meteo.com/v1/forecast?latitude=-6.7924&longitude=39.2083&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m&timezone=Africa%2FDar_es_Salaam";
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Weather service unavailable");
+        const data = await response.json(), c = data.current;
+        $("temperature").textContent = Math.round(c.temperature_2m) + "°";
+        $("weatherDesc").textContent = weatherText(c.weather_code) + (c.is_day ? " · Daytime" : " · Night");
+        $("weatherIcon").textContent = weatherIcon(c.weather_code,c.is_day);
+        $("humidity").textContent = "Humidity " + c.relative_humidity_2m + "%";
+        $("wind").textContent = "Wind " + c.wind_speed_10m + " km/h";
+        weatherLoaded = true;
+      } catch { $("weatherDesc").textContent = "Weather data temporarily unavailable"; }
+    }
+    function weatherText(code) {
+      if(code===0)return "Clear sky";if([1,2,3].includes(code))return "Partly cloudy";if([45,48].includes(code))return "Fog";
+      if([51,53,55,56,57].includes(code))return "Drizzle";if([61,63,65,66,67,80,81,82].includes(code))return "Rain";
+      if([71,73,75,77,85,86].includes(code))return "Snow";if([95,96,99].includes(code))return "Thunderstorm";return "Current conditions";
+    }
+    function weatherIcon(code,day) { if([95,96,99].includes(code))return "⛈️";if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return "🌧️";if([45,48].includes(code))return "🌫️";if(code===0)return day?"☀️":"🌙";return "⛅"; }
   </script>
 </body>
 </html>
