@@ -102,8 +102,11 @@
   </div>
 
   <script>
-    // Keep the bearer token in memory only: reloading the page requires signing in again.
+    // Keep the bearer token for this browser tab only. sessionStorage survives refreshes,
+    // but is cleared when the tab session ends; it is never stored in localStorage.
     const API = "https://esp32-remote-control-v2-api.masoudsubi.workers.dev";
+    const SESSION_TOKEN_KEY = "esp32v2_session_token";
+    const SESSION_EXPIRY_KEY = "esp32v2_session_expiry";
     let sessionToken = null;
     let sessionEndsAt = 0;
     let pollHandle = null;
@@ -120,6 +123,8 @@
         const data = await response.json();
         if (!response.ok || !data.token) throw new Error(data.error || "Login failed (" + response.status + ")");
         sessionToken = data.token; sessionEndsAt = Date.now() + (data.expiresIn || 28800) * 1000;
+        sessionStorage.setItem(SESSION_TOKEN_KEY, sessionToken);
+        sessionStorage.setItem(SESSION_EXPIRY_KEY, String(sessionEndsAt));
         $("accessCode").value = ""; $("loginView").classList.add("hidden"); $("dashboardView").classList.remove("hidden");
         startDashboard();
       } catch (error) { $("loginMsg").textContent = error.message || "Could not connect to the API."; }
@@ -128,6 +133,8 @@
 
     function logout(message) {
       sessionToken = null; sessionEndsAt = 0;
+      sessionStorage.removeItem(SESSION_TOKEN_KEY);
+      sessionStorage.removeItem(SESSION_EXPIRY_KEY);
       if (pollHandle) clearInterval(pollHandle);
       $("dashboardView").classList.add("hidden"); $("loginView").classList.remove("hidden");
       $("loginMsg").textContent = message || "You have been signed out.";
@@ -224,6 +231,40 @@
       if([71,73,75,77,85,86].includes(code))return "Snow";if([95,96,99].includes(code))return "Thunderstorm";return "Current conditions";
     }
     function weatherIcon(code,day) { if([95,96,99].includes(code))return "⛈️";if([51,53,55,56,57,61,63,65,66,67,80,81,82].includes(code))return "🌧️";if([45,48].includes(code))return "🌫️";if(code===0)return day?"☀️":"🌙";return "⛅"; }
+
+    // Restore only an unexpired tab session, then ask the API to validate its token.
+    async function restoreSession() {
+      const savedToken = sessionStorage.getItem(SESSION_TOKEN_KEY);
+      const savedExpiry = Number(sessionStorage.getItem(SESSION_EXPIRY_KEY));
+      if (!savedToken || !Number.isFinite(savedExpiry) || savedExpiry <= Date.now()) {
+        sessionStorage.removeItem(SESSION_TOKEN_KEY);
+        sessionStorage.removeItem(SESSION_EXPIRY_KEY);
+        return;
+      }
+
+      sessionToken = savedToken;
+      sessionEndsAt = savedExpiry;
+      try {
+        const response = await fetch(API + "/api/status", {
+          headers: authHeaders(),
+          cache: "no-store"
+        });
+        if (response.status === 401) {
+          logout("Your saved session is invalid or expired. Please sign in again.");
+          return;
+        }
+        // A temporary network/API error should not erase a still-unexpired token.
+        $("loginView").classList.add("hidden");
+        $("dashboardView").classList.remove("hidden");
+        startDashboard();
+      } catch {
+        $("loginView").classList.add("hidden");
+        $("dashboardView").classList.remove("hidden");
+        startDashboard();
+      }
+    }
+
+    restoreSession();
   </script>
 </body>
 </html>
