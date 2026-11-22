@@ -92,13 +92,7 @@
         </form>
         <div class="section-rule"></div>
         <h3>Device enrollment</h3>
-        <p class="muted small">An owner or administrator can issue a short-lived code for a device already registered as pending in this workspace.</p>
-        <form id="create-device-claim-form">
-          <label for="claim-device-id">Registered device ID</label>
-          <input id="claim-device-id" type="text" placeholder="Device UUID" pattern="[0-9a-fA-F-]{36}" required>
-          <button class="secondary full" id="create-device-claim-button" type="submit">Create enrollment code</button>
-          <div id="created-claim-result" class="token-result hidden"></div>
-        </form>
+        <p class="muted small">Owners and administrators can register a pending device from their workspace card and issue a short-lived enrollment code. Operators can redeem a code shared by their administrator.</p>
         <p class="fineprint">Enrollment codes authorize tenant registration only; they do not prove physical ESP32 identity or configure its MQTT credentials.</p>
         <form id="redeem-device-claim-form">
           <label for="redeem-claim-token">Redeem an enrollment code</label>
