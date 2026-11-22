@@ -1,0 +1,40 @@
+name: IoT Platform Frontend CI
+
+on:
+  push:
+    branches:
+      - platform-foundation
+    paths:
+      - "platform/**"
+      - ".github/workflows/platform-frontend-ci.yml"
+  pull_request:
+    branches:
+      - platform-foundation
+    paths:
+      - "platform/**"
+      - ".github/workflows/platform-frontend-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out isolated frontend branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check JavaScript module syntax
+        run: |
+          node --input-type=module --check < platform/app.js
+          node --input-type=module --check < platform/config.js
+      - name: Verify required portal files and security boundaries
+        run: |
+          test -s platform/index.html
+          test -s platform/styles.css
+          test -s platform/app.js
+          test -s platform/config.js
+          ! grep -R -E "service_role|SUPABASE_SERVICE_ROLE|CLOUDFLARE_API_TOKEN|EMQX_APP_SECRET" platform/
