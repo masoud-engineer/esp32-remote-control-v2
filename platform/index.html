@@ -92,13 +92,8 @@
         </form>
         <div class="section-rule"></div>
         <h3>Device enrollment</h3>
-        <p class="muted small">Owners and administrators can register a pending device from their workspace card and issue a short-lived enrollment code. Operators can redeem a code shared by their administrator.</p>
-        <p class="fineprint">Enrollment codes authorize tenant registration only; they do not prove physical ESP32 identity or configure its MQTT credentials.</p>
-        <form id="redeem-device-claim-form">
-          <label for="redeem-claim-token">Redeem an enrollment code</label>
-          <input id="redeem-claim-token" type="text" minlength="32" maxlength="128" autocomplete="off" required>
-          <button class="secondary full" id="redeem-device-claim-button" type="submit">Enroll device in my workspace</button>
-        </form>
+        <p class="muted small">Owners and administrators register pending devices and issue a one-time commissioning code. The physical ESP32 must present that code while generating and registering its own unique device credential.</p>
+        <p class="fineprint">A portal user cannot activate a device by entering the claim code. The device must complete its own HTTPS enrollment. MQTT credentials and remote control are not enabled yet.</p>
         <p class="fineprint">Development environment only. Device control and production hardware provisioning remain disabled.</p>
       </section>
     </section>
