@@ -197,7 +197,67 @@ async function loadOrganizations() {
         });
         card.append(deviceForm);
       }
+      const inventory = document.createElement("div");
+      inventory.className = "device-inventory";
+      const inventoryTitle = document.createElement("strong");
+      inventoryTitle.textContent = "Registered devices";
+      const inventoryBody = document.createElement("div");
+      inventoryBody.className = "device-list";
+      const loading = document.createElement("span");
+      loading.className = "muted small"; loading.textContent = "Loading device inventory…";
+      inventoryBody.append(loading);
+      inventory.append(inventoryTitle, inventoryBody);
+      card.append(inventory);
       list.append(card);
+
+      apiRequest("/api/organizations/" + encodeURIComponent(org.id) + "/devices")
+        .then((result) => {
+          inventoryBody.replaceChildren();
+          const devices = Array.isArray(result.devices) ? result.devices : [];
+          if (!devices.length) {
+            const empty = document.createElement("span");
+            empty.className = "muted small"; empty.textContent = "No devices registered yet.";
+            inventoryBody.append(empty);
+            return;
+          }
+          for (const device of devices) {
+            const itemRow = document.createElement("div");
+            itemRow.className = "device-item";
+            const details = document.createElement("div");
+            const name = document.createElement("strong"); name.textContent = device.name || device.device_uid;
+            const meta = document.createElement("span");
+            meta.textContent = device.device_uid + " · " + device.device_type + " · " + device.status;
+            details.append(name, meta); itemRow.append(details);
+            if (["owner", "admin"].includes(item.role) && device.status === "pending_claim") {
+              const issue = document.createElement("button");
+              issue.type = "button"; issue.className = "secondary"; issue.textContent = "Issue enrollment code";
+              issue.addEventListener("click", async () => {
+                issue.disabled = true; issue.textContent = "Creating…";
+                try {
+                  const claim = await apiRequest("/api/devices/" + encodeURIComponent(device.id) + "/claims", { method: "POST" });
+                  const token = document.createElement("code"); token.textContent = claim.claimToken;
+                  const expiry = document.createElement("span");
+                  expiry.textContent = "One-time code expires " + new Date(claim.expiresAt).toLocaleString() + ". Share privately.";
+                  const copy = document.createElement("button"); copy.type = "button"; copy.className = "secondary"; copy.textContent = "Copy code";
+                  copy.addEventListener("click", async () => {
+                    try { await navigator.clipboard.writeText(claim.claimToken); copy.textContent = "Copied"; }
+                    catch { copy.textContent = "Copy unavailable"; }
+                  });
+                  itemRow.append(expiry, token, copy);
+                  issue.remove();
+                } catch (error) { notice(error.message || "Could not issue enrollment code.", "error"); issue.disabled = false; issue.textContent = "Retry enrollment code"; }
+              });
+              itemRow.append(issue);
+            }
+            inventoryBody.append(itemRow);
+          }
+        })
+        .catch((error) => {
+          inventoryBody.replaceChildren();
+          const failed = document.createElement("span");
+          failed.className = "muted small"; failed.textContent = error.message || "Device inventory unavailable.";
+          inventoryBody.append(failed);
+        });
     }
   } catch (error) {
     list.replaceChildren();
