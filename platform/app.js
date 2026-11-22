@@ -125,6 +125,77 @@ async function loadOrganizations() {
           finally { submit.disabled = false; submit.textContent = "Create invitation"; }
         });
         card.append(inviteForm);
+
+        const deviceForm = document.createElement("form");
+        deviceForm.className = "inline-form";
+        const deviceTitle = document.createElement("strong");
+        deviceTitle.textContent = "Register a device";
+        const deviceUid = document.createElement("input");
+        deviceUid.required = true; deviceUid.minLength = 3; deviceUid.maxLength = 96;
+        deviceUid.pattern = "[A-Za-z0-9][A-Za-z0-9._:-]{2,95}";
+        deviceUid.placeholder = "Unique device UID"; deviceUid.setAttribute("aria-label", "Device UID");
+        const deviceName = document.createElement("input");
+        deviceName.required = true; deviceName.maxLength = 120;
+        deviceName.placeholder = "Device name"; deviceName.setAttribute("aria-label", "Device name");
+        const deviceType = document.createElement("input");
+        deviceType.required = true; deviceType.minLength = 2; deviceType.maxLength = 80;
+        deviceType.placeholder = "Device type (e.g. pump-controller)";
+        deviceType.setAttribute("aria-label", "Device type");
+        const deviceModel = document.createElement("input");
+        deviceModel.maxLength = 120; deviceModel.placeholder = "Model (optional)";
+        deviceModel.setAttribute("aria-label", "Device model");
+        const deviceLocation = document.createElement("input");
+        deviceLocation.maxLength = 160; deviceLocation.placeholder = "Installation location (optional)";
+        deviceLocation.setAttribute("aria-label", "Installation location");
+        const register = document.createElement("button");
+        register.className = "secondary"; register.type = "submit"; register.textContent = "Register pending device";
+        const deviceResult = document.createElement("div");
+        deviceResult.className = "token-result hidden";
+        deviceForm.append(deviceTitle, deviceUid, deviceName, deviceType, deviceModel, deviceLocation, register, deviceResult);
+        deviceForm.addEventListener("submit", async (event) => {
+          event.preventDefault(); register.disabled = true; register.textContent = "Registering…";
+          deviceResult.classList.add("hidden"); deviceResult.replaceChildren();
+          try {
+            const created = await apiRequest("/api/organizations/" + encodeURIComponent(org.id) + "/devices", {
+              method: "POST",
+              body: JSON.stringify({
+                deviceUid: deviceUid.value.trim(),
+                name: deviceName.value.trim(),
+                deviceType: deviceType.value.trim(),
+                model: deviceModel.value.trim(),
+                installationLocation: deviceLocation.value.trim()
+              })
+            });
+            const device = created.device;
+            const summary = document.createElement("span");
+            summary.textContent = device.name + " registered as pending. Device ID: " + device.id;
+            deviceResult.append(summary);
+            const issue = document.createElement("button");
+            issue.type = "button"; issue.className = "secondary"; issue.textContent = "Create 30-minute enrollment code";
+            issue.addEventListener("click", async () => {
+              issue.disabled = true; issue.textContent = "Creating code…";
+              try {
+                const claim = await apiRequest("/api/devices/" + encodeURIComponent(device.id) + "/claims", { method: "POST" });
+                const label = document.createElement("span");
+                label.textContent = "One-time code (expires " + new Date(claim.expiresAt).toLocaleString() + "). Share privately with the authorized operator.";
+                const code = document.createElement("code"); code.textContent = claim.claimToken;
+                const copy = document.createElement("button"); copy.type = "button"; copy.className = "secondary"; copy.textContent = "Copy code";
+                copy.addEventListener("click", async () => {
+                  try { await navigator.clipboard.writeText(claim.claimToken); copy.textContent = "Copied"; }
+                  catch { copy.textContent = "Copy unavailable"; }
+                });
+                deviceResult.append(label, code, copy);
+                issue.remove();
+              } catch (error) { notice(error.message || "Could not create an enrollment code.", "error"); issue.disabled = false; issue.textContent = "Retry enrollment code"; }
+            });
+            deviceResult.append(issue);
+            deviceResult.classList.remove("hidden");
+            deviceUid.value = ""; deviceName.value = ""; deviceType.value = "";
+            deviceModel.value = ""; deviceLocation.value = "";
+          } catch (error) { notice(error.message || "Device registration failed.", "error"); }
+          finally { register.disabled = false; register.textContent = "Register pending device"; }
+        });
+        card.append(deviceForm);
       }
       list.append(card);
     }
@@ -159,32 +230,6 @@ function setupEnrollmentForms() {
       notice("Invitation accepted. Your workspace membership is active.", "success");
       await loadOrganizations();
     } catch (error) { notice(error.message || "Invitation could not be accepted.", "error"); }
-    finally { setBusy(button, false); }
-  });
-
-  $("create-device-claim-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = $("create-device-claim-button");
-    setBusy(button, true, "Creating…");
-    try {
-      const deviceId = $("claim-device-id").value.trim();
-      const claim = await apiRequest("/api/devices/" + encodeURIComponent(deviceId) + "/claims", {
-        method: "POST"
-      });
-      $("claim-device-id").value = "";
-      const result = $("created-claim-result");
-      result.replaceChildren();
-      const label = document.createElement("span");
-      label.textContent = "One-time enrollment code (expires " + new Date(claim.expiresAt).toLocaleString() + "). Share privately with an authorized team member.";
-      const token = document.createElement("code"); token.textContent = claim.claimToken;
-      const copy = document.createElement("button"); copy.type = "button"; copy.className = "secondary"; copy.textContent = "Copy code";
-      copy.addEventListener("click", async () => {
-        try { await navigator.clipboard.writeText(claim.claimToken); copy.textContent = "Copied"; }
-        catch { copy.textContent = "Copy unavailable"; }
-      });
-      result.append(label, token, copy); result.classList.remove("hidden");
-      notice("Enrollment code created. This code does not authenticate physical hardware.", "success");
-    } catch (error) { notice(error.message || "Enrollment code could not be created.", "error"); }
     finally { setBusy(button, false); }
   });
 
