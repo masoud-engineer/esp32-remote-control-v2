@@ -306,6 +306,49 @@ async function loadOrganizations() {
               disabledNote.textContent = "Credentials revoked. Device is disabled; recovery is not yet available.";
               itemRow.append(disabledNote);
             }
+
+            const eventsButton = document.createElement("button");
+            eventsButton.type = "button"; eventsButton.className = "secondary";
+            eventsButton.textContent = "View recent events";
+            const eventPanel = document.createElement("div");
+            eventPanel.className = "token-result hidden";
+            eventsButton.addEventListener("click", async () => {
+              if (!eventPanel.classList.contains("hidden")) {
+                eventPanel.classList.add("hidden");
+                eventsButton.textContent = "View recent events";
+                return;
+              }
+              eventsButton.disabled = true; eventsButton.textContent = "Loading events…";
+              eventPanel.replaceChildren();
+              try {
+                const history = await apiRequest("/api/devices/" + encodeURIComponent(device.id) + "/events?limit=10");
+                const events = Array.isArray(history.events) ? history.events : [];
+                if (!events.length) {
+                  const empty = document.createElement("span");
+                  empty.className = "muted small"; empty.textContent = "No device events recorded yet.";
+                  eventPanel.append(empty);
+                }
+                for (const event of events) {
+                  const entry = document.createElement("div");
+                  entry.className = "event-entry";
+                  const heading = document.createElement("strong");
+                  heading.textContent = event.event_type + " · " + new Date(event.received_at).toLocaleString();
+                  const payload = document.createElement("code");
+                  payload.textContent = JSON.stringify(event.payload);
+                  entry.append(heading, payload);
+                  eventPanel.append(entry);
+                }
+                eventPanel.classList.remove("hidden");
+                eventsButton.textContent = "Hide recent events";
+              } catch (error) {
+                const failed = document.createElement("span");
+                failed.className = "muted small"; failed.textContent = error.message || "Event history unavailable.";
+                eventPanel.append(failed);
+                eventPanel.classList.remove("hidden");
+                eventsButton.textContent = "Retry recent events";
+              } finally { eventsButton.disabled = false; }
+            });
+            itemRow.append(eventsButton, eventPanel);
             inventoryBody.append(itemRow);
           }
         })
