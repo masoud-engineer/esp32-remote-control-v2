@@ -3,4 +3,4 @@ export const SUPABASE_URL = "https://kzmcepeutqtyyiipgyfc.supabase.co";
 export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_HRP1mV9xEaenscAOtSBL7Q_r5NoUOTm";
 
 // Set this only after the isolated Cloudflare development Worker is deployed.
-export const PLATFORM_API_URL = "";
+export const PLATFORM_API_URL = "https://esp32-iot-platform-dev-api.masoudsubi.workers.dev";
