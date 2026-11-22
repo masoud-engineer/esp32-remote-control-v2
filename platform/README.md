@@ -19,7 +19,7 @@ Device control is deliberately not included or enabled.
 
 ## Configuration
 
-config.js contains the Supabase project URL, the browser-safe publishable key, and PLATFORM_API_URL. The API URL must be set to the confirmed development Worker URL after deployment.
+config.js contains the Supabase project URL, the browser-safe publishable key, and the isolated development Worker URL. The development Worker URL is now configured.
 
 Never place a Supabase service-role/secret key, Cloudflare API token, EMQX secret, or other server credential in this folder.
 
@@ -33,12 +33,10 @@ Never place a Supabase service-role/secret key, Cloudflare API token, EMQX secre
 
 ## Before testing
 
-1. Deploy only .github/workflows/platform-dev-deploy.yml from the backend repository's platform-foundation branch.
-2. Confirm the Worker URL and /api/health response.
-3. Add this exact portal URL to Supabase Auth redirect URLs:
+1. The isolated development Worker has been deployed. Its public health endpoint could not yet be independently verified from this environment.
+2. Add this exact portal URL to Supabase Auth redirect URLs:
    https://masoud-engineer.github.io/esp32-remote-control-v2/platform/
-4. Confirm email confirmation settings and email delivery.
-5. Set PLATFORM_API_URL in config.js to the confirmed development Worker URL.
-6. Publish the platform/ folder from the frontend repository after reviewing the branch diff.
+3. Confirm email confirmation settings and email delivery.
+4. Publish the platform/ folder from the frontend repository only after reviewing the branch diff. Keep the production V2 dashboard unchanged.
 
 This is a development foundation, not a production-ready customer portal.
