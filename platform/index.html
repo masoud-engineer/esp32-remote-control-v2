@@ -82,7 +82,30 @@
           <p class="hint">Lowercase letters, numbers and hyphens only. This ID must be unique.</p>
           <button class="primary full" id="create-org-button" type="submit">Create workspace</button>
         </form>
-        <p class="fineprint">This development portal currently supports account access and workspace creation only. Device control is not enabled here.</p>
+        <div class="section-rule"></div>
+        <h3>Join a business workspace</h3>
+        <p class="muted small">If an administrator shared an invitation token with you, enter it here. Your signed-in email must match the invited email address.</p>
+        <form id="accept-invitation-form">
+          <label for="invitation-token">Invitation token</label>
+          <input id="invitation-token" type="text" minlength="32" maxlength="128" autocomplete="off" required>
+          <button class="primary full" id="accept-invitation-button" type="submit">Accept invitation</button>
+        </form>
+        <div class="section-rule"></div>
+        <h3>Device enrollment</h3>
+        <p class="muted small">An owner or administrator can issue a short-lived code for a device already registered as pending in this workspace.</p>
+        <form id="create-device-claim-form">
+          <label for="claim-device-id">Registered device ID</label>
+          <input id="claim-device-id" type="text" placeholder="Device UUID" pattern="[0-9a-fA-F-]{36}" required>
+          <button class="secondary full" id="create-device-claim-button" type="submit">Create enrollment code</button>
+          <div id="created-claim-result" class="token-result hidden"></div>
+        </form>
+        <p class="fineprint">Enrollment codes authorize tenant registration only; they do not prove physical ESP32 identity or configure its MQTT credentials.</p>
+        <form id="redeem-device-claim-form">
+          <label for="redeem-claim-token">Redeem an enrollment code</label>
+          <input id="redeem-claim-token" type="text" minlength="32" maxlength="128" autocomplete="off" required>
+          <button class="secondary full" id="redeem-device-claim-button" type="submit">Enroll device in my workspace</button>
+        </form>
+        <p class="fineprint">Development environment only. Device control and production hardware provisioning remain disabled.</p>
       </section>
     </section>
     <footer>© <span id="year"></span> Masoud Engineering · Development environment · Not for production customer use</footer>
