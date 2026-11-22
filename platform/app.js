@@ -84,6 +84,48 @@ async function loadOrganizations() {
       const meta = document.createElement("span");
       meta.textContent = (org.slug || "no-id") + " · " + (item.role || "member");
       card.append(title, meta);
+      if (["owner", "admin"].includes(item.role)) {
+        const inviteForm = document.createElement("form");
+        inviteForm.className = "inline-form";
+        const inviteTitle = document.createElement("strong");
+        inviteTitle.textContent = "Invite a team member";
+        const email = document.createElement("input");
+        email.type = "email"; email.required = true; email.maxLength = 254;
+        email.placeholder = "colleague@example.com"; email.setAttribute("aria-label", "Invitee email");
+        const role = document.createElement("select");
+        role.setAttribute("aria-label", "Invitation role");
+        for (const value of (item.role === "owner" ? ["admin", "operator", "viewer"] : ["operator", "viewer"])) {
+          const option = document.createElement("option");
+          option.value = value; option.textContent = value[0].toUpperCase() + value.slice(1);
+          role.append(option);
+        }
+        const submit = document.createElement("button");
+        submit.className = "secondary"; submit.type = "submit"; submit.textContent = "Create invitation";
+        const result = document.createElement("div");
+        result.className = "token-result hidden";
+        inviteForm.append(inviteTitle, email, role, submit, result);
+        inviteForm.addEventListener("submit", async (event) => {
+          event.preventDefault(); submit.disabled = true; submit.textContent = "Creating…";
+          result.classList.add("hidden"); result.replaceChildren();
+          try {
+            const invitation = await apiRequest("/api/organizations/" + encodeURIComponent(org.id) + "/invitations", {
+              method: "POST", body: JSON.stringify({ email: email.value.trim(), role: role.value })
+            });
+            const label = document.createElement("span");
+            label.textContent = "One-time invitation token (expires " + new Date(invitation.expiresAt).toLocaleString() + "). Deliver it privately; it will not be shown again.";
+            const token = document.createElement("code"); token.textContent = invitation.invitationToken;
+            const copy = document.createElement("button"); copy.type = "button"; copy.className = "secondary"; copy.textContent = "Copy token";
+            copy.addEventListener("click", async () => {
+              try { await navigator.clipboard.writeText(invitation.invitationToken); copy.textContent = "Copied"; }
+              catch { copy.textContent = "Copy unavailable"; }
+            });
+            result.append(label, token, copy); result.classList.remove("hidden");
+            email.value = "";
+          } catch (error) { notice(error.message || "Invitation could not be created.", "error"); }
+          finally { submit.disabled = false; submit.textContent = "Create invitation"; }
+        });
+        card.append(inviteForm);
+      }
       list.append(card);
     }
   } catch (error) {
@@ -102,6 +144,66 @@ async function enterWorkspace(session) {
   clearNotice();
   await loadOrganizations();
 }
+
+function setupEnrollmentForms() {
+  $("accept-invitation-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = $("accept-invitation-button");
+    setBusy(button, true, "Accepting…");
+    try {
+      await apiRequest("/api/invitations/accept", {
+        method: "POST",
+        body: JSON.stringify({ invitationToken: $("invitation-token").value.trim() })
+      });
+      $("invitation-token").value = "";
+      notice("Invitation accepted. Your workspace membership is active.", "success");
+      await loadOrganizations();
+    } catch (error) { notice(error.message || "Invitation could not be accepted.", "error"); }
+    finally { setBusy(button, false); }
+  });
+
+  $("create-device-claim-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = $("create-device-claim-button");
+    setBusy(button, true, "Creating…");
+    try {
+      const deviceId = $("claim-device-id").value.trim();
+      const claim = await apiRequest("/api/devices/" + encodeURIComponent(deviceId) + "/claims", {
+        method: "POST"
+      });
+      $("claim-device-id").value = "";
+      const result = $("created-claim-result");
+      result.replaceChildren();
+      const label = document.createElement("span");
+      label.textContent = "One-time enrollment code (expires " + new Date(claim.expiresAt).toLocaleString() + "). Share privately with an authorized team member.";
+      const token = document.createElement("code"); token.textContent = claim.claimToken;
+      const copy = document.createElement("button"); copy.type = "button"; copy.className = "secondary"; copy.textContent = "Copy code";
+      copy.addEventListener("click", async () => {
+        try { await navigator.clipboard.writeText(claim.claimToken); copy.textContent = "Copied"; }
+        catch { copy.textContent = "Copy unavailable"; }
+      });
+      result.append(label, token, copy); result.classList.remove("hidden");
+      notice("Enrollment code created. This code does not authenticate physical hardware.", "success");
+    } catch (error) { notice(error.message || "Enrollment code could not be created.", "error"); }
+    finally { setBusy(button, false); }
+  });
+
+  $("redeem-device-claim-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = $("redeem-device-claim-button");
+    setBusy(button, true, "Claiming…");
+    try {
+      const result = await apiRequest("/api/device-claims/redeem", {
+        method: "POST",
+        body: JSON.stringify({ claimToken: $("redeem-claim-token").value.trim() })
+      });
+      $("redeem-claim-token").value = "";
+      notice("Device enrollment accepted for device " + result.deviceId + ".", "success");
+    } catch (error) { notice(error.message || "Device enrollment could not be completed.", "error"); }
+    finally { setBusy(button, false); }
+  });
+}
+
 $("login-tab").addEventListener("click", () => setAuthMode("login"));
 $("signup-tab").addEventListener("click", () => setAuthMode("signup"));
 $("forgot-button").addEventListener("click", () => { clearNotice(); showPanel("reset-panel"); });
@@ -224,6 +326,7 @@ supabase.auth.onAuthStateChange((event, session) => {
     $("panel-title").textContent = "Welcome back";
   }
 });
+setupEnrollmentForms();
 $("year").textContent = new Date().getFullYear();
 const { data: { session } } = await supabase.auth.getSession();
 if (window.location.hash.includes("type=recovery")) {
