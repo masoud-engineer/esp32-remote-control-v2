@@ -62,3 +62,7 @@ footer{margin-top:38px;color:#71869c;font-size:10px}
 .device-item strong{font-size:12px}
 .device-item span{font-size:10px;color:var(--muted)}
 .device-item code{display:block;padding:8px;background:#071a17;border-radius:7px;color:#e2fff2;font-size:11px;overflow-wrap:anywhere;user-select:all}
+
+.event-entry{display:grid;gap:5px;padding:9px;border:1px solid #2b4057;border-radius:8px;background:#091725}
+.event-entry strong{font-size:11px;color:#d7e5f2}
+.event-entry code{white-space:pre-wrap;word-break:break-word;color:#b7cce0;background:#07111d;padding:7px;border-radius:6px}
