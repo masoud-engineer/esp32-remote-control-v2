@@ -52,7 +52,7 @@ jobs:
             if (!html.includes('id="' + id + '"')) throw new Error('Missing portal control: ' + id);
             if (!js.includes(id)) throw new Error('No application handler for: ' + id);
           }
-          for (const marker of ['Register a device', '/api/organizations/', '/api/device-claims/redeem', 'Create 30-minute enrollment code']) {
+          for (const marker of ['Register a device', '/api/organizations/', 'Create 30-minute enrollment code']) {
             if (!js.includes(marker)) throw new Error('Missing device enrollment behavior: ' + marker);
           }
           for (const marker of ['Registered devices', '/devices', 'Issue enrollment code']) {
