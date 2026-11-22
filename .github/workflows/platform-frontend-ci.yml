@@ -55,5 +55,8 @@ jobs:
           for (const marker of ['Register a device', '/api/organizations/', '/api/device-claims/redeem', 'Create 30-minute enrollment code']) {
             if (!js.includes(marker)) throw new Error('Missing device enrollment behavior: ' + marker);
           }
+          for (const marker of ['Registered devices', '/devices', 'Issue enrollment code']) {
+            if (!js.includes(marker)) throw new Error('Missing device inventory behavior: ' + marker);
+          }
           console.log('Portal invitation, device registration and enrollment handlers verified.');
           NODE
