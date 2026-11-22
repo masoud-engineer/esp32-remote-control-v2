@@ -45,8 +45,6 @@ jobs:
           const required = [
             'accept-invitation-form',
             'invitation-token',
-            'create-device-claim-form',
-            'claim-device-id',
             'redeem-device-claim-form',
             'redeem-claim-token'
           ];
@@ -54,5 +52,8 @@ jobs:
             if (!html.includes('id="' + id + '"')) throw new Error('Missing portal control: ' + id);
             if (!js.includes(id)) throw new Error('No application handler for: ' + id);
           }
-          console.log('Portal invitation and device enrollment controls verified.');
+          for (const marker of ['Register a device', '/api/organizations/', '/api/device-claims/redeem', 'Create 30-minute enrollment code']) {
+            if (!js.includes(marker)) throw new Error('Missing device enrollment behavior: ' + marker);
+          }
+          console.log('Portal invitation, device registration and enrollment handlers verified.');
           NODE
