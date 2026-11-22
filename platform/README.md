@@ -14,8 +14,11 @@ https://masoud-engineer.github.io/esp32-remote-control-v2/platform/
 - Persistent Supabase browser session with token refresh
 - List business workspaces through the isolated Cloudflare development Worker
 - Create a business workspace through the authenticated Worker endpoint
+- Create team invitations from an owner/admin workspace card, with role restrictions enforced by the database
+- Accept an invitation using a one-time token and a verified email address that matches the invitation
+- Issue short-lived enrollment codes for pre-registered pending devices and redeem codes within the same business workspace
 
-Device control is deliberately not included or enabled.
+Device control is deliberately not included or enabled. Device enrollment codes are tenant authorization only; they do not attest physical hardware or provision MQTT credentials. Invitation delivery is manual; the portal displays the one-time token once for private sharing.
 
 ## Configuration
 
@@ -37,6 +40,8 @@ Never place a Supabase service-role/secret key, Cloudflare API token, EMQX secre
 2. Add this exact portal URL to Supabase Auth redirect URLs:
    https://masoud-engineer.github.io/esp32-remote-control-v2/platform/
 3. Confirm email confirmation settings and email delivery.
-4. Publish the platform/ folder from the frontend repository only after reviewing the branch diff. Keep the production V2 dashboard unchanged.
+4. Run the platform portal CI checks on the development branch.
+5. Review and test the invitation and device enrollment flows with dedicated test accounts and test device records.
+6. Publish the platform/ folder only after reviewing the branch diff and completing the separate release checklist. Keep the production V2 dashboard unchanged.
 
 This is a development foundation, not a production-ready customer portal.
