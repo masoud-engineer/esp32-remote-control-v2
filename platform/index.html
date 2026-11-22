@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1422">
+  <meta name="description" content="Secure business account portal for the IoT platform.">
+  <title>Masoud Engineering | IoT Platform</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="IoT Platform home">
+      <span class="brand-mark">M</span>
+      <span><strong>MASOUD ENGINEERING</strong><small>CONNECTED SYSTEMS PLATFORM</small></span>
+    </a>
+    <span class="environment"><i></i> DEVELOPMENT</span>
+  </header>
+  <main class="shell">
+    <section class="intro">
+      <p class="eyebrow">BUSINESS DEVICE MANAGEMENT</p>
+      <h1>One secure place to manage your connected equipment.</h1>
+      <p class="lead">Create your account, register your business workspace and prepare to manage devices, users and activity from one dashboard.</p>
+      <div class="trustline"><span>●</span> Protected sign-in <span>·</span> Business workspaces <span>·</span> Role-based access foundation</div>
+    </section>
+    <section class="portal card" aria-live="polite">
+      <div class="card-heading">
+        <div><p class="eyebrow">ACCOUNT PORTAL</p><h2 id="panel-title">Welcome back</h2></div>
+        <span class="secure-tag">SECURE AUTH</span>
+      </div>
+      <div id="notice" class="notice hidden" role="status"></div>
+      <section id="auth-panel">
+        <div class="tabs" role="tablist" aria-label="Account actions">
+          <button class="tab active" id="login-tab" type="button">Sign in</button>
+          <button class="tab" id="signup-tab" type="button">Create account</button>
+        </div>
+        <form id="auth-form">
+          <label for="email">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@business.com" required>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required>
+          <button class="primary full" id="auth-submit" type="submit">Sign in securely</button>
+        </form>
+        <button class="text-button" id="forgot-button" type="button">Forgot your password?</button>
+        <p class="fineprint">Your password is handled by Supabase Auth. It is never sent to our Worker or stored in this website's code.</p>
+      </section>
+      <section id="reset-panel" class="hidden">
+        <p class="muted">Enter your account email and we'll send a password-reset link.</p>
+        <form id="reset-form">
+          <label for="reset-email">Email address</label>
+          <input id="reset-email" type="email" autocomplete="email" required>
+          <button class="primary full" type="submit">Send reset link</button>
+        </form>
+        <button class="text-button" id="back-to-auth" type="button">Back to sign in</button>
+      </section>
+      <section id="recovery-panel" class="hidden">
+        <p class="muted">Choose a new password for your account.</p>
+        <form id="recovery-form">
+          <label for="new-password">New password</label>
+          <input id="new-password" type="password" minlength="8" autocomplete="new-password" required>
+          <label for="confirm-password">Confirm new password</label>
+          <input id="confirm-password" type="password" minlength="8" autocomplete="new-password" required>
+          <button class="primary full" type="submit">Update password</button>
+        </form>
+      </section>
+      <section id="workspace-panel" class="hidden">
+        <div class="signed-in">
+          <div><span class="muted">Signed in as</span><strong id="signed-in-email"></strong></div>
+          <button class="secondary" id="signout-button" type="button">Sign out</button>
+        </div>
+        <div class="section-rule"></div>
+        <h3>Your business workspaces</h3>
+        <p class="muted small">A workspace keeps your business users and devices separate from other customers.</p>
+        <div id="org-list" class="org-list"><p class="muted small">Loading your workspaces…</p></div>
+        <div class="section-rule"></div>
+        <h3>Create a business workspace</h3>
+        <form id="org-form">
+          <label for="org-name">Business or workspace name</label>
+          <input id="org-name" type="text" minlength="2" maxlength="120" placeholder="e.g. ABC Electrical Services" required>
+          <label for="org-slug">Workspace ID</label>
+          <input id="org-slug" type="text" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="abc-electrical-services" required>
+          <p class="hint">Lowercase letters, numbers and hyphens only. This ID must be unique.</p>
+          <button class="primary full" id="create-org-button" type="submit">Create workspace</button>
+        </form>
+        <p class="fineprint">This development portal currently supports account access and workspace creation only. Device control is not enabled here.</p>
+      </section>
+    </section>
+    <footer>© <span id="year"></span> Masoud Engineering · Development environment · Not for production customer use</footer>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
