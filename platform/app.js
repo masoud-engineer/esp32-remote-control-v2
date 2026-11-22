@@ -38,7 +38,7 @@ function safeSlug(value) {
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 function apiReady() {
-  return /^https:\/\/[a-z0-9-]+\.workers\.dev$/i.test(PLATFORM_API_URL);
+  return /^https:\/\/(?:[a-z0-9-]+\.)+workers\.dev$/i.test(PLATFORM_API_URL);
 }
 async function apiRequest(path, options = {}) {
   if (!apiReady()) throw new Error("The development API has not been connected yet. Sign-in is available; workspace creation will be enabled after the separate development Worker is deployed.");
