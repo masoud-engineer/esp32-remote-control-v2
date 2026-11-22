@@ -1,0 +1,56 @@
+name: IoT Platform Portal CI
+
+on:
+  push:
+    branches:
+      - platform-foundation
+    paths:
+      - "platform/**"
+      - ".github/workflows/platform-portal-ci.yml"
+  pull_request:
+    branches:
+      - platform-foundation
+    paths:
+      - "platform/**"
+      - ".github/workflows/platform-portal-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out development branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate browser module syntax
+        run: node --input-type=module --check < platform/app.js
+      - name: Validate portal structure and required controls
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const html = readFileSync('platform/index.html', 'utf8');
+          const js = readFileSync('platform/app.js', 'utf8');
+          const required = [
+            'accept-invitation-form',
+            'invitation-token',
+            'create-device-claim-form',
+            'claim-device-id',
+            'redeem-device-claim-form',
+            'redeem-claim-token'
+          ];
+          for (const id of required) {
+            if (!html.includes('id="' + id + '"')) throw new Error('Missing portal control: ' + id);
+          }
+          for (const id of required) {
+            if (!js.includes(id)) throw new Error('No application handler for: ' + id);
+          }
+          if (html.includes('service_role') || js.includes('service_role')) {
+            throw new Error('A privileged database key must never appear in browser code.');
+          }
+          console.log('Portal structure and invitation/enrollment handlers verified.');
+          NODE
