@@ -293,20 +293,7 @@ function setupEnrollmentForms() {
     finally { setBusy(button, false); }
   });
 
-  $("redeem-device-claim-form").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = $("redeem-device-claim-button");
-    setBusy(button, true, "Claiming…");
-    try {
-      const result = await apiRequest("/api/device-claims/redeem", {
-        method: "POST",
-        body: JSON.stringify({ claimToken: $("redeem-claim-token").value.trim() })
-      });
-      $("redeem-claim-token").value = "";
-      notice("Device enrollment accepted for device " + result.deviceId + ".", "success");
-    } catch (error) { notice(error.message || "Device enrollment could not be completed.", "error"); }
-    finally { setBusy(button, false); }
-  });
+
 }
 
 $("login-tab").addEventListener("click", () => setAuthMode("login"));
