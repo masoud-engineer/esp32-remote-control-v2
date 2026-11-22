@@ -38,3 +38,21 @@ jobs:
           test -s platform/app.js
           test -s platform/config.js
           ! grep -R -E "service_role|SUPABASE_SERVICE_ROLE|CLOUDFLARE_API_TOKEN|EMQX_APP_SECRET" platform/
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const html = readFileSync('platform/index.html', 'utf8');
+          const js = readFileSync('platform/app.js', 'utf8');
+          const required = [
+            'accept-invitation-form',
+            'invitation-token',
+            'create-device-claim-form',
+            'claim-device-id',
+            'redeem-device-claim-form',
+            'redeem-claim-token'
+          ];
+          for (const id of required) {
+            if (!html.includes('id="' + id + '"')) throw new Error('Missing portal control: ' + id);
+            if (!js.includes(id)) throw new Error('No application handler for: ' + id);
+          }
+          console.log('Portal invitation and device enrollment controls verified.');
+          NODE
