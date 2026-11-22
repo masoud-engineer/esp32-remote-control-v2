@@ -44,19 +44,20 @@ jobs:
           const js = readFileSync('platform/app.js', 'utf8');
           const required = [
             'accept-invitation-form',
-            'invitation-token',
-            'redeem-device-claim-form',
-            'redeem-claim-token'
+            'invitation-token'
           ];
           for (const id of required) {
             if (!html.includes('id="' + id + '"')) throw new Error('Missing portal control: ' + id);
             if (!js.includes(id)) throw new Error('No application handler for: ' + id);
           }
-          for (const marker of ['Register a device', '/api/organizations/', 'Create 30-minute enrollment code']) {
+          if (html.includes('redeem-device-claim-form') || js.includes('/api/device-claims/redeem')) {
+            throw new Error('Legacy user-operated device activation must remain removed.');
+          }
+          for (const marker of ['physical ESP32', 'one-time commissioning code', 'Register a device', '/api/organizations/', 'Create 30-minute enrollment code']) {
             if (!js.includes(marker)) throw new Error('Missing device enrollment behavior: ' + marker);
           }
           for (const marker of ['Registered devices', '/devices', 'Issue enrollment code']) {
             if (!js.includes(marker)) throw new Error('Missing device inventory behavior: ' + marker);
           }
-          console.log('Portal invitation, device registration and enrollment handlers verified.');
+          console.log('Portal invitation, device registration and physical-only enrollment boundaries verified.');
           NODE
