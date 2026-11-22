@@ -249,6 +249,63 @@ async function loadOrganizations() {
               });
               itemRow.append(issue);
             }
+
+            if (["owner", "admin"].includes(item.role) && device.status === "active") {
+              const rotate = document.createElement("button");
+              rotate.type = "button"; rotate.className = "secondary";
+              rotate.textContent = "Request credential rotation";
+              rotate.addEventListener("click", async () => {
+                rotate.disabled = true; rotate.textContent = "Requesting…";
+                try {
+                  const request = await apiRequest("/api/devices/" + encodeURIComponent(device.id) + "/credential-rotations", {
+                    method: "POST"
+                  });
+                  const instructions = document.createElement("span");
+                  instructions.textContent = "One-time rotation code expires " +
+                    new Date(request.expiresAt).toLocaleString() +
+                    ". Deliver privately to the physical device operator. On its serial monitor, type rotate, then paste this code.";
+                  const code = document.createElement("code");
+                  code.textContent = request.rotationToken;
+                  const copy = document.createElement("button");
+                  copy.type = "button"; copy.className = "secondary"; copy.textContent = "Copy rotation code";
+                  copy.addEventListener("click", async () => {
+                    try { await navigator.clipboard.writeText(request.rotationToken); copy.textContent = "Copied"; }
+                    catch { copy.textContent = "Copy unavailable"; }
+                  });
+                  itemRow.append(instructions, code, copy);
+                  rotate.textContent = "Request another rotation code";
+                  rotate.disabled = false;
+                } catch (error) {
+                  notice(error.message || "Credential rotation could not be requested.", "error");
+                  rotate.disabled = false; rotate.textContent = "Retry credential rotation";
+                }
+              });
+              const revoke = document.createElement("button");
+              revoke.type = "button"; revoke.className = "secondary";
+              revoke.textContent = "Emergency revoke device";
+              revoke.addEventListener("click", async () => {
+                if (!window.confirm("Revoke this device's active credential and disable the device? It will stop authenticating and needs a separately authorized recovery process.")) return;
+                revoke.disabled = true; revoke.textContent = "Revoking…";
+                try {
+                  await apiRequest("/api/devices/" + encodeURIComponent(device.id) + "/credentials/revoke", {
+                    method: "POST"
+                  });
+                  meta.textContent = device.device_uid + " · " + device.device_type + " · disabled";
+                  rotate.remove(); revoke.textContent = "Device disabled";
+                  notice("Device credentials revoked. The device is now disabled.", "success");
+                } catch (error) {
+                  notice(error.message || "Device credential revocation failed.", "error");
+                  revoke.disabled = false; revoke.textContent = "Retry emergency revoke";
+                }
+              });
+              itemRow.append(rotate, revoke);
+            }
+            if (["owner", "admin"].includes(item.role) && device.status === "disabled") {
+              const disabledNote = document.createElement("span");
+              disabledNote.className = "muted small";
+              disabledNote.textContent = "Credentials revoked. Device is disabled; recovery is not yet available.";
+              itemRow.append(disabledNote);
+            }
             inventoryBody.append(itemRow);
           }
         })
