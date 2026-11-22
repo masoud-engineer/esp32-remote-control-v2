@@ -16,7 +16,7 @@ https://masoud-engineer.github.io/esp32-remote-control-v2/platform/
 - Create a business workspace through the authenticated Worker endpoint
 - Create team invitations from an owner/admin workspace card, with role restrictions enforced by the database
 - Accept an invitation using a one-time token and a verified email address that matches the invitation
-- Register pending devices inside an owner/admin workspace, then issue short-lived enrollment codes and let same-business operators redeem them
+- View each business workspace's device inventory, register pending devices as an owner/admin, issue short-lived enrollment codes and let same-business operators redeem them
 
 Device control is deliberately not included or enabled. Device registration creates a pending database record; enrollment codes authorize tenant assignment only and do not attest physical hardware or provision MQTT credentials. Invitation delivery is manual; the portal displays the one-time token once for private sharing.
 
